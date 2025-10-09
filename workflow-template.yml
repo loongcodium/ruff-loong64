@@ -1,0 +1,88 @@
+name: Update
+on:
+  workflow_dispatch:
+
+env:
+  RUFF_VERSION: 0.13.0
+  RUFF_VSCODE_VERSION: 2025.26.0
+
+jobs:
+  build-ruff:
+  build-id:
+
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: loongarch64-unknown-linux-gnu
+            code-target: linux-loong64
+            python-platform: manylinux_2_36_loongarch64
+
+    name: Build (${{ matrix.target }})
+    needs: ["build-id", "build-ruff"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout ruff-vscode repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: astral-sh/ruff-vscode
+          ref: ${{ env.RUFF_VSCODE_VERSION }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Python dependencies
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.x"
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Download wheels from previous step
+        uses: actions/download-artifact@v5
+        with:
+          name: wheels-${{ matrix.target }}
+
+      - name: Install libraries
+        run: |
+          uv pip compile --python-version 3.7.9 --generate-hashes -o ./requirements.txt ./pyproject.toml --no-emit-package ruff
+          git diff -- requirements.txt
+          python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade -r ./requirements.txt --platform=${{ matrix.python-platform }}
+          python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade ruff --no-index --find-links . --platform=${{ matrix.python-platform }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+
+      - name: Install Node dependencies.
+        run: npm ci
+
+      - name: Set Build ID (release)
+        if: "startsWith(github.ref, 'refs/tags/')"
+        run: |
+          python -m build.update_ext_version --build-id "${RELEASE_BUILD_ID}" --for-publishing
+        env:
+          RELEASE_BUILD_ID: ${{ needs.build-id.outputs.RELEASE_BUILD_ID }}
+
+      # Build the extension.
+      - name: Package Extension (release)
+        run: npx vsce package -o "./dist/ruff-${{ matrix.code-target }}.vsix"
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          path: loongcodium-ruff
+
+      - name: Patch vsix
+        run: uv run --no-project loongcodium-ruff/patch-vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
+
+      # Upload the extension.
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dist-${{ matrix.target }}
+          path: ./dist
+

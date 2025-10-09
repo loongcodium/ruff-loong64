@@ -1,0 +1,116 @@
+diff --git a/crates/ruff/Cargo.toml b/crates/ruff/Cargo.toml
+index b990cff2d..ad06a560b 100644
+--- a/crates/ruff/Cargo.toml
++++ b/crates/ruff/Cargo.toml
+@@ -85,7 +85,7 @@ dist = true
+ [target.'cfg(target_os = "windows")'.dependencies]
+ mimalloc = { workspace = true }
+ 
+-[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
++[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "loongarch64")))'.dependencies]
+ tikv-jemallocator = { workspace = true }
+ 
+ [lints]
+diff --git a/crates/ruff/src/main.rs b/crates/ruff/src/main.rs
+index 62e4f85b6..a8e9664ad 100644
+--- a/crates/ruff/src/main.rs
++++ b/crates/ruff/src/main.rs
+@@ -20,7 +20,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+         target_arch = "x86_64",
+         target_arch = "aarch64",
+         target_arch = "powerpc64",
+-        target_arch = "riscv64"
++        target_arch = "riscv64",
++        target_arch = "loongarch64",
+     )
+ ))]
+ #[global_allocator]
+diff --git a/crates/ruff_benchmark/Cargo.toml b/crates/ruff_benchmark/Cargo.toml
+index 92606c990..a10dbb65f 100644
+--- a/crates/ruff_benchmark/Cargo.toml
++++ b/crates/ruff_benchmark/Cargo.toml
+@@ -86,5 +86,5 @@ walltime = ["ruff_db/os", "ty_project", "divan"]
+ [target.'cfg(target_os = "windows")'.dev-dependencies]
+ mimalloc = { workspace = true }
+ 
+-[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dev-dependencies]
++[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "loongarch64")))'.dev-dependencies]
+ tikv-jemallocator = { workspace = true }
+diff --git a/crates/ruff_benchmark/benches/formatter.rs b/crates/ruff_benchmark/benches/formatter.rs
+index f2bd54bb4..a2c56c175 100644
+--- a/crates/ruff_benchmark/benches/formatter.rs
++++ b/crates/ruff_benchmark/benches/formatter.rs
+@@ -22,7 +22,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+         target_arch = "x86_64",
+         target_arch = "aarch64",
+         target_arch = "powerpc64",
+-        target_arch = "riscv64"
++        target_arch = "riscv64",
++        target_arch = "loongarch64"
+     )
+ ))]
+ #[global_allocator]
+diff --git a/crates/ruff_benchmark/benches/lexer.rs b/crates/ruff_benchmark/benches/lexer.rs
+index 968ac74b1..e337f6344 100644
+--- a/crates/ruff_benchmark/benches/lexer.rs
++++ b/crates/ruff_benchmark/benches/lexer.rs
+@@ -19,7 +19,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+         target_arch = "x86_64",
+         target_arch = "aarch64",
+         target_arch = "powerpc64",
+-        target_arch = "riscv64"
++        target_arch = "riscv64",
++        target_arch = "loongarch64"
+     )
+ ))]
+ #[global_allocator]
+diff --git a/crates/ruff_benchmark/benches/linter.rs b/crates/ruff_benchmark/benches/linter.rs
+index 98ef4083a..4c1eb8b69 100644
+--- a/crates/ruff_benchmark/benches/linter.rs
++++ b/crates/ruff_benchmark/benches/linter.rs
+@@ -27,7 +27,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+         target_arch = "x86_64",
+         target_arch = "aarch64",
+         target_arch = "powerpc64",
+-        target_arch = "riscv64"
++        target_arch = "riscv64",
++        target_arch = "loongarch64"
+     )
+ ))]
+ #[global_allocator]
+@@ -44,7 +45,8 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+         target_arch = "x86_64",
+         target_arch = "aarch64",
+         target_arch = "powerpc64",
+-        target_arch = "riscv64"
++        target_arch = "riscv64",
++        target_arch = "loongarch64"
+     )
+ ))]
+ #[unsafe(export_name = "_rjem_malloc_conf")]
+diff --git a/crates/ruff_benchmark/benches/parser.rs b/crates/ruff_benchmark/benches/parser.rs
+index d5e086eb5..d1bbe6fd9 100644
+--- a/crates/ruff_benchmark/benches/parser.rs
++++ b/crates/ruff_benchmark/benches/parser.rs
+@@ -21,7 +21,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+         target_arch = "x86_64",
+         target_arch = "aarch64",
+         target_arch = "powerpc64",
+-        target_arch = "riscv64"
++        target_arch = "riscv64",
++        target_arch = "loongarch64"
+     )
+ ))]
+ #[global_allocator]
+diff --git a/dist-workspace.toml b/dist-workspace.toml
+index 1f23f1118..5c4ee12e6 100644
+--- a/dist-workspace.toml
++++ b/dist-workspace.toml
+@@ -30,6 +30,7 @@ targets = [
+     "powerpc64le-unknown-linux-gnu",
+     "riscv64gc-unknown-linux-gnu",
+     "s390x-unknown-linux-gnu",
++    "loongarch64-unknown-linux-gnu",
+     "x86_64-unknown-linux-gnu",
+     "x86_64-unknown-linux-musl",
+     "x86_64-pc-windows-msvc",
