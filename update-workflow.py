@@ -1,10 +1,12 @@
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.11"
 # dependencies = [
 #     "ruamel-yaml",
 # ]
 # ///
 from urllib.request import urlopen
+from sys import argv
+import tomllib
 from textwrap import dedent
 from ruamel.yaml import YAML, comments
 
@@ -12,17 +14,22 @@ yaml = YAML()
 yaml.width = 160
 yaml.indent(mapping=2, sequence=4, offset=2)
 
-ruff_version = "0.13.0"
-ruff_vscode_version = "2025.26.0"
+
+def get_ruff_versions(ruff_vscode_version=None):
+    ref = f"tags/{ruff_vscode_version}" if ruff_vscode_version else "heads/main"
+    with urlopen(
+        f"https://raw.githubusercontent.com/astral-sh/ruff-vscode/refs/{ref}/pyproject.toml"
+    ) as r:
+        project = tomllib.load(r)["project"]
+        ruff_vscode_version = project["version"]
+        ruff_version = next(
+            d.split("==")[-1] for d in project["dependencies"] if d.startswith("ruff==")
+        )
+        return ruff_version, ruff_vscode_version
 
 
 def get_step(steps, field="uses", starts="actions/checkout"):
-    return list(
-        filter(
-            lambda step: step.get(field) and step.get(field).startswith(starts),
-            steps,
-        )
-    )[0]
+    return next(s for s in steps if s.get(field) and s.get(field).startswith(starts))
 
 
 def remove_comments(y):
@@ -95,7 +102,6 @@ def gen_ruff_vscode_build_id_job(original_workflow):
     steps = original_workflow["jobs"]["build-id"]["steps"]
 
     job["env"] = original_workflow["env"]
-    remove_comments(job["env"])
 
     get_step(steps)["with"]["repository"] = "astral-sh/ruff-vscode"
     get_step(steps)["with"]["ref"] = "${{ env.RUFF_VSCODE_VERSION }}"
@@ -184,10 +190,25 @@ def gen_ruff_vscode_job(original_workflow):
     return job
 
 
-def gen_workflow():
-    template_file = "./workflow-template.yml"
-    with open(template_file) as f:
-        template = yaml.load(f)
+def gen_workflow(ruff_version, ruff_vscode_version):
+    template = yaml.load("""\
+        name: Update
+        on:
+          workflow_dispatch:
+
+        env:
+
+        jobs:
+          build-ruff:
+          build-id:
+          build:
+
+    """)
+
+    template["env"] = {
+        "RUFF_VERSION": ruff_version,
+        "RUFF_VSCODE_VERSION": ruff_vscode_version,
+    }
 
     with urlopen(
         f"https://raw.githubusercontent.com/astral-sh/ruff/refs/tags/{ruff_version}/.github/workflows/build-binaries.yml"
@@ -205,5 +226,6 @@ def gen_workflow():
     return template
 
 
+workflow = gen_workflow(*get_ruff_versions(argv[1] if len(argv) > 1 else None))
 with open(".github/workflows/release.yml", "w") as f:
-    yaml.dump(gen_workflow(), f)
+    yaml.dump(workflow, f)
