@@ -47,14 +47,11 @@ jobs:
         docker-options: ${{ matrix.platform.maturin_docker_options }}
         args: --release --locked --out dist
     - uses: uraimo/run-on-arch-action@d94c13912ea685de38fccc1109385b83fd79427d   # v3.0.1
-      if: ${{ matrix.platform.arch != 'ppc64' && matrix.platform.arch != 
-        'ppc64le'}}
+      if: ${{ matrix.platform.arch != 'ppc64' && matrix.platform.arch != 'ppc64le'}}
       name: Test wheel
       with:
-        arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || 
-          matrix.platform.arch }}
-        distro: ${{ matrix.platform.arch == 'arm' && 'bullseye' || 'ubuntu20.04'
-          }}
+        arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
+        distro: ${{ matrix.platform.arch == 'arm' && 'bullseye' || 'ubuntu20.04' }}
         githubToken: ${{ github.token }}
         install: |
           apt-get update
@@ -199,8 +196,7 @@ jobs:
         path: loongcodium-ruff
 
     - name: Patch vsix
-      run: uv run --no-project loongcodium-ruff/patch-vsix.py "./dist/ruff-${{ 
-        matrix.code-target }}.vsix"
+      run: uv run --no-project loongcodium-ruff/patch-vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
 
       # Upload the extension.
     - name: Upload artifacts

@@ -8,6 +8,7 @@ from urllib.request import urlopen
 from ruamel.yaml import YAML
 
 yaml = YAML()
+yaml.width = 160
 
 ruff_version = "0.13.0"
 ruff_vscode_version = "2025.26.0"
