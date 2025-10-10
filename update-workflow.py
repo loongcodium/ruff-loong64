@@ -99,6 +99,9 @@ def gen_workflow():
     ) as r:
         release_workflow = yaml.load(r)
         template["jobs"]["build-id"] = release_workflow["jobs"]["build-id"]
+        template["jobs"]["build-id"]["steps"][0]["with"]["repository"] = (
+            "astral-sh/ruff-vscode"
+        )
         try:
             template["jobs"]["build-id"]["steps"][-1].ca.items["run"][2] = None
         except Exception as e:
