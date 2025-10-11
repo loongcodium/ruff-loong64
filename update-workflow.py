@@ -194,7 +194,13 @@ def gen_workflow(ruff_version, ruff_vscode_version):
     template = yaml.load("""\
         name: Update
         on:
+          push:
+            tags:
+              - "*.*.*"
           workflow_dispatch:
+
+        permissions:
+          contents: write
 
         env:
 
@@ -203,6 +209,20 @@ def gen_workflow(ruff_version, ruff_vscode_version):
           build-id:
           build:
 
+          release:
+            runs-on: ubuntu-latest
+            if: startsWith(github.ref, 'refs/tags/')
+            needs: ["build"]
+            steps:
+              - name: Download artifacts
+                uses: actions/download-artifact@v5
+              - uses: softprops/action-gh-release@v2
+                with:
+                  files: |
+                    ./**/*.vsix
+                    ./**/*.whl
+                    ./**/*.tar.gz
+                    ./**/*.sha256
     """)
 
     template["env"] = {
