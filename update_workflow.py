@@ -6,26 +6,13 @@
 # ///
 from urllib.request import urlopen
 from sys import argv
-import tomllib
 from textwrap import dedent
 from ruamel.yaml import YAML, comments
+from get_versions import get_ruff_versions
 
 yaml = YAML()
 yaml.width = 160
 yaml.indent(mapping=2, sequence=4, offset=2)
-
-
-def get_ruff_versions(ruff_vscode_version=None):
-    ref = f"tags/{ruff_vscode_version}" if ruff_vscode_version else "heads/main"
-    with urlopen(
-        f"https://raw.githubusercontent.com/astral-sh/ruff-vscode/refs/{ref}/pyproject.toml"
-    ) as r:
-        project = tomllib.load(r)["project"]
-        ruff_vscode_version = project["version"]
-        ruff_version = next(
-            d.split("==")[-1] for d in project["dependencies"] if d.startswith("ruff==")
-        )
-        return ruff_version, ruff_vscode_version
 
 
 def get_step(steps, field="uses", starts="actions/checkout"):
@@ -198,10 +185,7 @@ def gen_workflow(ruff_version, ruff_vscode_version):
             tags:
               - "*.*.*"
           workflow_dispatch:
-
-        permissions:
-          contents: write
-
+        
         env:
 
         jobs:
@@ -213,6 +197,8 @@ def gen_workflow(ruff_version, ruff_vscode_version):
             runs-on: ubuntu-latest
             if: startsWith(github.ref, 'refs/tags/')
             needs: ["build"]
+            permissions:
+              contents: write
             steps:
               - name: Download artifacts
                 uses: actions/download-artifact@v5
@@ -246,6 +232,7 @@ def gen_workflow(ruff_version, ruff_vscode_version):
     return template
 
 
-workflow = gen_workflow(*get_ruff_versions(argv[1] if len(argv) > 1 else None))
-with open(".github/workflows/release.yml", "w") as f:
-    yaml.dump(workflow, f)
+if __name__ == "__main__":
+    workflow = gen_workflow(*get_ruff_versions(argv[1] if len(argv) > 1 else None))
+    with open(".github/workflows/release.yml", "w") as f:
+        yaml.dump(workflow, f)
