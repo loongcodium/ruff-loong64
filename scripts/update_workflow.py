@@ -165,7 +165,7 @@ def gen_ruff_vscode_job(original_workflow):
             path: loongcodium-ruff
 
         - name: Patch vsix
-          run: uv run --no-project loongcodium-ruff/patch-vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
+          run: uv run --no-project loongcodium-ruff/scripts/patch-vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
 
     """)
     patch_vsix_index = steps.index(get_step(steps, "name", "Upload artifacts"))
