@@ -13,6 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.PAT }}
       - uses: astral-sh/setup-uv@v6
       - name: Get versions
         id: versions
@@ -25,3 +27,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update to ruff-vscode ${{ steps.versions.outputs.ruff_vscode_version }}"
+          tag_name: ${{ steps.versions.outputs.ruff_vscode_version }}
