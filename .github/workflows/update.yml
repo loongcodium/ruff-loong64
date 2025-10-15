@@ -1,0 +1,27 @@
+name: Update workflow
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Get versions
+        id: versions
+        run: echo "ruff_vscode_version=$(uv run scripts/get_versions.py | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+      - name: Update workflow
+        run: uv run scripts/update_workflow.py ${{ steps.versions.outputs.ruff_vscode_version }}
+      - name: Git diff
+        run: git diff
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update to ruff-vscode ${{ steps.versions.outputs.ruff_vscode_version }}"
