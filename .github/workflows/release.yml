@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RUFF_VERSION: 0.14.0
-  RUFF_VSCODE_VERSION: 2025.28.0
+  RUFF_VERSION: 0.14.6
+  RUFF_VSCODE_VERSION: 2025.30.0
 
 jobs:
   build-ruff:
@@ -178,9 +178,9 @@ jobs:
           python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade ruff --no-index --find-links . --platform=${{ matrix.python-platform }}
 
       - name: Install Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          node-version: 22
+          node-version: 24
 
       # Install Node dependencies.
       - run: npm ci
@@ -217,7 +217,7 @@ jobs:
         run: uv run --no-project loongcodium-ruff/scripts/patch_vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: dist-${{ matrix.target }}
           path: ./dist
