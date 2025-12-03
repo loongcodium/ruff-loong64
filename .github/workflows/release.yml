@@ -177,6 +177,16 @@ jobs:
           python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade -r ./requirements.txt --platform=${{ matrix.python-platform }}
           python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade ruff --no-index --find-links . --platform=${{ matrix.python-platform }}
 
+      - name: Patch metadata
+        run: |
+          cat package.json | \
+          jq '.displayName="Ruff (loong64)"' | \
+          jq '.publisher="loong-vsx"' | \
+          jq '.homepage="https://github.com/loongcodium/loongcodium-ruff"' | \
+          jq '.repository.url="https://github.com/loongcodium/loongcodium-ruff.git"' | \
+          jq '.bugs.url="https://github.com/loongcodium/loongcodium-ruff/issues"' \
+          > tmp.json && mv -v tmp.json package.json
+
       - name: Install Node.js
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
