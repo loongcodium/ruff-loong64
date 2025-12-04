@@ -248,3 +248,10 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*.sha256
+
+      - name: Install ovsx
+        run: npm install --global ovsx
+      - name: Publish extension
+        run: ovsx publish ./**/*.vsix
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
