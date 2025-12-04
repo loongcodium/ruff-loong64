@@ -176,19 +176,19 @@ def gen_ruff_vscode_job(original_workflow):
     )
 
     # Patch vsix
-    patch_vsix_steps = yaml.load("""\
-        - name: Checkout repository
-          uses: actions/checkout@v5
-          with:
-            path: loongcodium-ruff
-
-        - name: Patch vsix
-          run: uv run --no-project loongcodium-ruff/scripts/patch_vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
-
-    """)
-    patch_vsix_index = steps.index(get_step(steps, "name", "Upload artifacts"))
-    for i, step in enumerate(patch_vsix_steps):
-        job["steps"].insert(patch_vsix_index + i, step)
+    # patch_vsix_steps = yaml.load("""\
+    #     - name: Checkout repository
+    #       uses: actions/checkout@v5
+    #       with:
+    #         path: loongcodium-ruff
+    #
+    #     - name: Patch vsix
+    #       run: uv run --no-project loongcodium-ruff/scripts/patch_vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
+    #
+    # """)
+    # patch_vsix_index = steps.index(get_step(steps, "name", "Upload artifacts"))
+    # for i, step in enumerate(patch_vsix_steps):
+    #     job["steps"].insert(patch_vsix_index + i, step)
 
     remove_comments(steps[-1]["with"])
 
@@ -230,6 +230,13 @@ def gen_workflow(ruff_version, ruff_vscode_version):
                     ./**/*.whl
                     ./**/*.tar.gz
                     ./**/*.sha256
+
+              - name: Install ovsx
+                run: npm install --global ovsx
+              - name: Publish extension
+                run: ovsx publish ./**/*.vsix
+                env:
+                  OVSX_PAT: ${{ secrets.OVSX_PAT }}
     """)
     )
 
