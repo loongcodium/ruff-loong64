@@ -218,14 +218,6 @@ jobs:
         run: npx vsce package -o "./dist/ruff-${{ matrix.code-target }}.vsix" --pre-release
 
       # Upload the extension.
-      - name: Checkout repository
-        uses: actions/checkout@v5
-        with:
-          path: loongcodium-ruff
-
-      - name: Patch vsix
-        run: uv run --no-project loongcodium-ruff/scripts/patch_vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
-
       - name: Upload artifacts
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
