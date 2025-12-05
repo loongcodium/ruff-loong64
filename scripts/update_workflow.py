@@ -35,7 +35,7 @@ def gen_ruff_binaries_job(original_workflow, patch_path="patches/ruff.patch"):
     checkout_step["with"]["ref"] = "${{ env.RUFF_VERSION }}"
 
     # Add patch steps
-    patch_steps_path = "loongcodium-ruff"
+    patch_steps_path = "ruff-loong64"
     patch_steps = yaml.load(f"""\
         - uses: actions/checkout@v5
           with:
@@ -157,9 +157,9 @@ def gen_ruff_vscode_job(original_workflow):
             cat package.json | \\
             jq '.displayName="Ruff (loong64)"' | \\
             jq '.publisher="loong-vsx"' | \\
-            jq '.homepage="https://github.com/loongcodium/loongcodium-ruff"' | \\
-            jq '.repository.url="https://github.com/loongcodium/loongcodium-ruff.git"' | \\
-            jq '.bugs.url="https://github.com/loongcodium/loongcodium-ruff/issues"' \\
+            jq '.homepage="https://github.com/loongcodium/ruff-loong64"' | \\
+            jq '.repository.url="https://github.com/loongcodium/ruff-loong64.git"' | \\
+            jq '.bugs.url="https://github.com/loongcodium/ruff-loong64/issues"' \\
             > tmp.json && mv -v tmp.json package.json
 
     """)[0]
@@ -174,21 +174,6 @@ def gen_ruff_vscode_job(original_workflow):
     get_step(steps, "name", "Package Extension (nightly)")["run"] = (
         build_cmd + " --pre-release"
     )
-
-    # Patch vsix
-    # patch_vsix_steps = yaml.load("""\
-    #     - name: Checkout repository
-    #       uses: actions/checkout@v5
-    #       with:
-    #         path: loongcodium-ruff
-    #
-    #     - name: Patch vsix
-    #       run: uv run --no-project loongcodium-ruff/scripts/patch_vsix.py "./dist/ruff-${{ matrix.code-target }}.vsix"
-    #
-    # """)
-    # patch_vsix_index = steps.index(get_step(steps, "name", "Upload artifacts"))
-    # for i, step in enumerate(patch_vsix_steps):
-    #     job["steps"].insert(patch_vsix_index + i, step)
 
     remove_comments(steps[-1]["with"])
 

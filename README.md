@@ -1,10 +1,10 @@
-# loongcodium-ruff
+# ruff-loong64
 
 This project builds [ruff-vscode](https://github.com/astral-sh/ruff-vscode) for LoongArch with a bundled Ruff binary.
 
-To get the extension, please navigate to [releases](https://github.com/SkyBird233/loongcodium-ruff/releases) and download the `.vsix` file, and then install it with `codium --install-extension ruff-linux-loong64.vsix`. Ruff binary and wheel files are also provided.
+To get the extension, please navigate to [releases](https://github.com/loongcodium/ruff-loong64/releases) and download the `.vsix` file, and then install it with `codium --install-extension ruff-linux-loong64.vsix`. Ruff binary and wheel files are also provided.
 
-If you are not sure which version to download, just grab [the latest version](https://github.com/SkyBird233/loongcodium-ruff/releases/latest/download/ruff-linux-loong64.vsix). If you need a specific version, please download the version with the largest `-x`.
+If you are not sure which version to download, just grab [the latest version](https://github.com/loongcodium/ruff-loong64/releases/latest/download/ruff-linux-loong64.vsix). If you need a specific version, please download the version with the largest `-x`.
 
 ## Q & A
 

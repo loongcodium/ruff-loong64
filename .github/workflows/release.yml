@@ -31,14 +31,14 @@ jobs:
           ref: ${{ env.RUFF_VERSION }}
       - uses: actions/checkout@v5
         with:
-          path: loongcodium-ruff
+          path: ruff-loong64
           sparse-checkout: |
             patches/ruff.patch
           sparse-checkout-cone-mode: false
       - name: Apply patch
         run: |
-          git apply loongcodium-ruff/patches/ruff.patch
-          rm -rf loongcodium-ruff
+          git apply ruff-loong64/patches/ruff.patch
+          rm -rf ruff-loong64
       - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -182,9 +182,9 @@ jobs:
           cat package.json | \
           jq '.displayName="Ruff (loong64)"' | \
           jq '.publisher="loong-vsx"' | \
-          jq '.homepage="https://github.com/loongcodium/loongcodium-ruff"' | \
-          jq '.repository.url="https://github.com/loongcodium/loongcodium-ruff.git"' | \
-          jq '.bugs.url="https://github.com/loongcodium/loongcodium-ruff/issues"' \
+          jq '.homepage="https://github.com/loongcodium/ruff-loong64"' | \
+          jq '.repository.url="https://github.com/loongcodium/ruff-loong64.git"' | \
+          jq '.bugs.url="https://github.com/loongcodium/ruff-loong64/issues"' \
           > tmp.json && mv -v tmp.json package.json
 
       - name: Install Node.js
@@ -240,3 +240,10 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*.sha256
+
+      - name: Install ovsx
+        run: npm install --global ovsx
+      - name: Publish extension
+        run: ovsx publish ./**/*.vsix
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
