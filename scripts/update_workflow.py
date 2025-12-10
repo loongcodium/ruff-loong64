@@ -157,6 +157,7 @@ def gen_ruff_vscode_job(original_workflow):
             cat package.json | \\
             jq '.displayName="Ruff (loong64)"' | \\
             jq '.description=(.description) + " This version is for LoongArch64 only."' | \\
+            jq '.version="${{ github.ref_name }}"' | \\
             jq '.publisher="loong-vsx"' | \\
             jq '.homepage="https://github.com/loongcodium/ruff-loong64"' | \\
             jq '.repository.url="https://github.com/loongcodium/ruff-loong64.git"' | \\
