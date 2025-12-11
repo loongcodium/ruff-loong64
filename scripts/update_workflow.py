@@ -84,19 +84,6 @@ def gen_ruff_binaries_job(original_workflow, patch_path="patches/ruff.patch"):
     return job
 
 
-def gen_ruff_vscode_build_id_job(original_workflow):
-    job = original_workflow["jobs"]["build-id"]
-    steps = original_workflow["jobs"]["build-id"]["steps"]
-
-    job["env"] = original_workflow["env"]
-
-    get_step(steps)["with"]["repository"] = "astral-sh/ruff-vscode"
-    get_step(steps)["with"]["ref"] = "${{ env.RUFF_VSCODE_VERSION }}"
-    remove_comments(steps[-1])
-
-    return job
-
-
 def gen_ruff_vscode_job(original_workflow):
     job = original_workflow["jobs"]["build"]
     steps = job["steps"]
@@ -108,6 +95,8 @@ def gen_ruff_vscode_job(original_workflow):
     steps.remove(get_step(steps, "uses", "jirutka/setup-alpine"))
     steps.remove(get_step(steps, "shell", "alpine.sh"))
     steps.remove(get_step(steps, "run", "python -m pip install -t ./bundled/libs"))
+    steps.remove(get_step(steps, "name", "Set Build ID (release)"))
+    steps.remove(get_step(steps, "name", "Set Build ID (nightly)"))
 
     # Update target list
     job["strategy"] = yaml.load("""\
@@ -119,7 +108,7 @@ def gen_ruff_vscode_job(original_workflow):
             python-platform: manylinux_2_36_loongarch64
 
     """)
-    job["needs"] = yaml.load('["build-id", "build-ruff"]')
+    job["needs"] = yaml.load('["build-ruff"]')
 
     # Update checkout step
     remove_comments(get_step(steps)["with"])
@@ -178,6 +167,7 @@ def gen_ruff_vscode_job(original_workflow):
     )
 
     remove_comments(steps[-1]["with"])
+    remove_comments(get_step(steps, "run", "npm ci"))
 
     return job
 
@@ -198,7 +188,6 @@ def gen_workflow(ruff_version, ruff_vscode_version):
 
         jobs:
           build-ruff:
-          build-id:
           build:
 
           release:
@@ -242,7 +231,6 @@ def gen_workflow(ruff_version, ruff_vscode_version):
         f"https://raw.githubusercontent.com/astral-sh/ruff-vscode/refs/tags/{ruff_vscode_version}/.github/workflows/release.yaml"
     ) as r:
         release_workflow = yaml.load(r)
-        template["jobs"]["build-id"] = gen_ruff_vscode_build_id_job(release_workflow)
         template["jobs"]["build"] = gen_ruff_vscode_job(release_workflow)
 
     return template
