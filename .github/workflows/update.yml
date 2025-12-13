@@ -27,4 +27,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update to ruff-vscode ${{ steps.versions.outputs.ruff_vscode_version }}"
-          tag_name: ${{ steps.versions.outputs.ruff_vscode_version }}
+          tag_name: ${{ steps.versions.outputs.ruff_vscode_version }}-0
