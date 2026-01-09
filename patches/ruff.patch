@@ -1,4 +1,4 @@
-From 4f7273c2730653f6aa01bb5632b425b552445bae Mon Sep 17 00:00:00 2001
+From c4c685c9b4c42f94b04e2af7167b3daae34da145 Mon Sep 17 00:00:00 2001
 From: SkyBird <52884766+SkyBird233@users.noreply.github.com>
 Date: Sat, 13 Sep 2025 01:49:13 +0800
 Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
@@ -90,7 +90,7 @@ index 5ec78c9e25..25387eb531 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/Cargo.toml b/crates/ruff_benchmark/Cargo.toml
-index 760aed7b1e..dc54df65e8 100644
+index 760aed7b1e..2450149d1d 100644
 --- a/crates/ruff_benchmark/Cargo.toml
 +++ b/crates/ruff_benchmark/Cargo.toml
 @@ -33,7 +33,7 @@ serde = { workspace = true }
@@ -98,7 +98,7 @@ index 760aed7b1e..dc54df65e8 100644
  tracing = { workspace = true }
  
 -[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
-+[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "loongarch64")))'.dev-dependencies]
++[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "loongarch64")))'.dependencies]
  tikv-jemallocator = { workspace = true, optional = true }
  
  [target.'cfg(target_os = "windows")'.dependencies]
