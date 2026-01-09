@@ -1,21 +1,85 @@
+From 4f7273c2730653f6aa01bb5632b425b552445bae Mon Sep 17 00:00:00 2001
+From: SkyBird <52884766+SkyBird233@users.noreply.github.com>
+Date: Sat, 13 Sep 2025 01:49:13 +0800
+Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
+
+---
+ .github/workflows/build-binaries.yml       | 12 ++++++++++--
+ .github/workflows/publish-pypi.yml         |  2 ++
+ crates/ruff/Cargo.toml                     |  2 +-
+ crates/ruff/src/main.rs                    |  3 ++-
+ crates/ruff_benchmark/Cargo.toml           |  2 +-
+ crates/ruff_benchmark/benches/formatter.rs |  3 ++-
+ crates/ruff_benchmark/benches/lexer.rs     |  3 ++-
+ crates/ruff_benchmark/benches/linter.rs    |  6 ++++--
+ crates/ruff_benchmark/benches/parser.rs    |  3 ++-
+ dist-workspace.toml                        |  1 +
+ 10 files changed, 27 insertions(+), 10 deletions(-)
+
+diff --git a/.github/workflows/build-binaries.yml b/.github/workflows/build-binaries.yml
+index 7ae4d244eb..57aa25ad75 100644
+--- a/.github/workflows/build-binaries.yml
++++ b/.github/workflows/build-binaries.yml
+@@ -299,6 +299,11 @@ jobs:
+             arch: arm
+           - target: riscv64gc-unknown-linux-gnu
+             arch: riscv64
++          - target: loongarch64-unknown-linux-gnu
++            arch: loong64
++            # There's currently no loong64 support for Ubuntu so we are using Debian
++            base_image: --platform=linux/loong64 ghcr.io/loong64/debian:trixie
++            maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
+ 
+     steps:
+       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+@@ -324,12 +329,15 @@ jobs:
+         with:
+           arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
+           distro: ${{ matrix.platform.arch == 'arm' && 'bullseye' || 'ubuntu20.04' }}
++          base_image: ${{ matrix.platform.base_image }}
+           githubToken: ${{ github.token }}
+           install: |
+             apt-get update
+-            apt-get install -y --no-install-recommends python3 python3-pip libatomic1
+-            pip3 install -U pip
++            apt-get install -y --no-install-recommends python3 python3-pip python3-venv libatomic1
+           run: |
++            python3 -m venv .venv
++            source .venv/bin/activate
++            pip3 install -U pip
+             pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
+             ruff --help
+       - name: "Upload wheels"
+diff --git a/.github/workflows/publish-pypi.yml b/.github/workflows/publish-pypi.yml
+index 5719a1d797..d2fbcbf916 100644
+--- a/.github/workflows/publish-pypi.yml
++++ b/.github/workflows/publish-pypi.yml
+@@ -28,5 +28,7 @@ jobs:
+           pattern: wheels-*
+           path: wheels
+           merge-multiple: true
++      - name: Remove wheels unsupported by PyPI
++        run: rm wheels/*loong*
+       - name: Publish to PyPi
+         run: uv publish -v wheels/*
 diff --git a/crates/ruff/Cargo.toml b/crates/ruff/Cargo.toml
-index b990cff2d..ad06a560b 100644
+index 547ddf5fa9..a5bd1a74f2 100644
 --- a/crates/ruff/Cargo.toml
 +++ b/crates/ruff/Cargo.toml
-@@ -85,7 +85,7 @@ dist = true
- [target.'cfg(target_os = "windows")'.dependencies]
- mimalloc = { workspace = true }
+@@ -69,7 +69,7 @@ tracing = { workspace = true, features = ["log"] }
+ walkdir = { workspace = true }
+ wild = { workspace = true }
  
 -[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
 +[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "loongarch64")))'.dependencies]
  tikv-jemallocator = { workspace = true }
  
- [lints]
+ [target.'cfg(target_os = "windows")'.dependencies]
 diff --git a/crates/ruff/src/main.rs b/crates/ruff/src/main.rs
-index 62e4f85b6..a8e9664ad 100644
+index 5ec78c9e25..25387eb531 100644
 --- a/crates/ruff/src/main.rs
 +++ b/crates/ruff/src/main.rs
-@@ -20,7 +20,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+@@ -21,7 +21,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
          target_arch = "x86_64",
          target_arch = "aarch64",
          target_arch = "powerpc64",
@@ -26,18 +90,20 @@ index 62e4f85b6..a8e9664ad 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/Cargo.toml b/crates/ruff_benchmark/Cargo.toml
-index 92606c990..a10dbb65f 100644
+index 760aed7b1e..dc54df65e8 100644
 --- a/crates/ruff_benchmark/Cargo.toml
 +++ b/crates/ruff_benchmark/Cargo.toml
-@@ -86,5 +86,5 @@ walltime = ["ruff_db/os", "ty_project", "divan"]
- [target.'cfg(target_os = "windows")'.dev-dependencies]
- mimalloc = { workspace = true }
+@@ -33,7 +33,7 @@ serde = { workspace = true }
+ serde_json = { workspace = true }
+ tracing = { workspace = true }
  
--[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dev-dependencies]
+-[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
 +[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "loongarch64")))'.dev-dependencies]
- tikv-jemallocator = { workspace = true }
+ tikv-jemallocator = { workspace = true, optional = true }
+ 
+ [target.'cfg(target_os = "windows")'.dependencies]
 diff --git a/crates/ruff_benchmark/benches/formatter.rs b/crates/ruff_benchmark/benches/formatter.rs
-index f2bd54bb4..a2c56c175 100644
+index f2bd54bb44..a2c56c175e 100644
 --- a/crates/ruff_benchmark/benches/formatter.rs
 +++ b/crates/ruff_benchmark/benches/formatter.rs
 @@ -22,7 +22,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -51,10 +117,10 @@ index f2bd54bb4..a2c56c175 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/benches/lexer.rs b/crates/ruff_benchmark/benches/lexer.rs
-index 968ac74b1..e337f6344 100644
+index 3b1a4dafde..ab7217e376 100644
 --- a/crates/ruff_benchmark/benches/lexer.rs
 +++ b/crates/ruff_benchmark/benches/lexer.rs
-@@ -19,7 +19,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+@@ -20,7 +20,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
          target_arch = "x86_64",
          target_arch = "aarch64",
          target_arch = "powerpc64",
@@ -65,7 +131,7 @@ index 968ac74b1..e337f6344 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/benches/linter.rs b/crates/ruff_benchmark/benches/linter.rs
-index 98ef4083a..4c1eb8b69 100644
+index 98ef4083a9..4c1eb8b69e 100644
 --- a/crates/ruff_benchmark/benches/linter.rs
 +++ b/crates/ruff_benchmark/benches/linter.rs
 @@ -27,7 +27,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -89,7 +155,7 @@ index 98ef4083a..4c1eb8b69 100644
  ))]
  #[unsafe(export_name = "_rjem_malloc_conf")]
 diff --git a/crates/ruff_benchmark/benches/parser.rs b/crates/ruff_benchmark/benches/parser.rs
-index d5e086eb5..d1bbe6fd9 100644
+index d5e086eb50..d1bbe6fd9f 100644
 --- a/crates/ruff_benchmark/benches/parser.rs
 +++ b/crates/ruff_benchmark/benches/parser.rs
 @@ -21,7 +21,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -103,7 +169,7 @@ index d5e086eb5..d1bbe6fd9 100644
  ))]
  #[global_allocator]
 diff --git a/dist-workspace.toml b/dist-workspace.toml
-index 1f23f1118..5c4ee12e6 100644
+index 002337b47e..0337e63185 100644
 --- a/dist-workspace.toml
 +++ b/dist-workspace.toml
 @@ -30,6 +30,7 @@ targets = [
@@ -114,3 +180,6 @@ index 1f23f1118..5c4ee12e6 100644
      "x86_64-unknown-linux-gnu",
      "x86_64-unknown-linux-musl",
      "x86_64-pc-windows-msvc",
+-- 
+2.52.0
+
