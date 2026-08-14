@@ -1,4 +1,4 @@
-From 8bd00fa05cd302ae33c6f472b4a3620ac6bf0772 Mon Sep 17 00:00:00 2001
+From ed7945bffb329aea40ae9ba523c455ccd9d1d60b Mon Sep 17 00:00:00 2001
 From: SkyBird <52884766+SkyBird233@users.noreply.github.com>
 Date: Sat, 13 Sep 2025 01:49:13 +0800
 Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
@@ -17,10 +17,10 @@ Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
  10 files changed, 29 insertions(+), 10 deletions(-)
 
 diff --git a/.github/workflows/build-binaries.yml b/.github/workflows/build-binaries.yml
-index 59360860c9..9302cd001c 100644
+index e25be8d8e6..46b4646eb8 100644
 --- a/.github/workflows/build-binaries.yml
 +++ b/.github/workflows/build-binaries.yml
-@@ -311,6 +311,13 @@ jobs:
+@@ -424,6 +424,13 @@ jobs:
              arch: riscv64
              # Minimum manylinux target for riscv64
              manylinux: 2_31
@@ -33,8 +33,8 @@ index 59360860c9..9302cd001c 100644
 +            manylinux: 2_36
  
      steps:
-       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-@@ -336,12 +343,15 @@ jobs:
+       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+@@ -449,12 +456,15 @@ jobs:
          with:
            arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
            distro: ${{ matrix.platform.arch == 'arm' && 'bullseye' || 'ubuntu20.04' }}
@@ -53,7 +53,7 @@ index 59360860c9..9302cd001c 100644
              ruff --help
        - name: "Upload wheels"
 diff --git a/.github/workflows/publish-pypi.yml b/.github/workflows/publish-pypi.yml
-index 83ad92e0a1..5ad563cf4b 100644
+index 20b8b4e794..d79092d4c2 100644
 --- a/.github/workflows/publish-pypi.yml
 +++ b/.github/workflows/publish-pypi.yml
 @@ -30,5 +30,7 @@ jobs:
@@ -65,7 +65,7 @@ index 83ad92e0a1..5ad563cf4b 100644
        - name: Publish to PyPi
          run: uv publish -v wheels/*
 diff --git a/crates/ruff/Cargo.toml b/crates/ruff/Cargo.toml
-index 9a7ed66590..62c19a6c48 100644
+index f1d2522982..01acc55be7 100644
 --- a/crates/ruff/Cargo.toml
 +++ b/crates/ruff/Cargo.toml
 @@ -71,7 +71,7 @@ tracing = { workspace = true, features = ["log"] }
@@ -78,7 +78,7 @@ index 9a7ed66590..62c19a6c48 100644
  
  [target.'cfg(target_os = "windows")'.dependencies]
 diff --git a/crates/ruff/src/main.rs b/crates/ruff/src/main.rs
-index 4342a360e6..f9de12bd08 100644
+index af8cb8a9d6..04dadac068 100644
 --- a/crates/ruff/src/main.rs
 +++ b/crates/ruff/src/main.rs
 @@ -21,7 +21,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -92,7 +92,7 @@ index 4342a360e6..f9de12bd08 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/Cargo.toml b/crates/ruff_benchmark/Cargo.toml
-index cf1a0fafd1..4910ca3fb1 100644
+index cbb817b668..f142962aa2 100644
 --- a/crates/ruff_benchmark/Cargo.toml
 +++ b/crates/ruff_benchmark/Cargo.toml
 @@ -33,7 +33,7 @@ serde = { workspace = true }
@@ -171,7 +171,7 @@ index 8aa633224a..1ba55da740 100644
  ))]
  #[global_allocator]
 diff --git a/dist-workspace.toml b/dist-workspace.toml
-index 34c319bc25..020be3d0ef 100644
+index 103921b8af..6b7d866b56 100644
 --- a/dist-workspace.toml
 +++ b/dist-workspace.toml
 @@ -32,6 +32,7 @@ targets = [
@@ -183,5 +183,5 @@ index 34c319bc25..020be3d0ef 100644
      "x86_64-unknown-linux-musl",
      "x86_64-pc-windows-msvc",
 -- 
-2.52.0
+2.55.0
 
