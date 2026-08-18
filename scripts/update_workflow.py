@@ -26,6 +26,9 @@ def remove_comments(y):
 def gen_ruff_binaries_job(original_workflow, patch_path="patches/ruff.patch"):
     job = original_workflow["jobs"]["linux-cross"]
 
+    # Replace actions runner
+    job["runs-on"] = "ubuntu-24.04"
+
     # Remove running condition
     job.pop("if")
 
