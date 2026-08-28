@@ -126,6 +126,7 @@ def gen_ruff_vscode_job(original_workflow):
     get_step(steps)["with"]["ref"] = "${{ env.RUFF_VSCODE_VERSION }}"
 
     # Install bundled wheels
+    # The export command is modified from upstream file scripts/release.py
     install_wheels_steps = yaml.load("""\
         - name: Install the latest version of uv
           uses: astral-sh/setup-uv@v6
@@ -137,7 +138,7 @@ def gen_ruff_vscode_job(original_workflow):
 
         - name: Install libraries
           run: |
-            uv pip compile --python-version 3.7.9 --generate-hashes -o ./requirements.txt ./pyproject.toml --no-emit-package ruff
+            uv export --default-index https://pypi.org/simple --format requirements-txt --no-dev --no-emit-project --locked --no-emit-package ruff --output-file ./requirements.txt
             git diff -- requirements.txt
             python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade -r ./requirements.txt --platform=${{ matrix.python-platform }}
             python3 -m pip install -t ./bundled/libs --implementation py --no-deps --upgrade ruff --no-index --find-links . --platform=${{ matrix.python-platform }}
