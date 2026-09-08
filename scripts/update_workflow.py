@@ -102,8 +102,7 @@ def gen_ruff_vscode_job(original_workflow):
     steps.remove(get_step(steps, "run", "arch -arm64"))
     steps.remove(get_step(steps, "run", "arch -x86_64"))
     steps.remove(get_step(steps, "uses", "uraimo/run-on-arch-action"))
-    steps.remove(get_step(steps, "uses", "jirutka/setup-alpine"))
-    steps.remove(get_step(steps, "shell", "alpine.sh"))
+    steps.remove(get_step(steps, "name", "Install musl Python dependencies"))
     steps.remove(get_step(steps, "run", "python -m pip install -t ./bundled/libs"))
     steps.remove(get_step(steps, "name", "Set Build ID (release)"))
     steps.remove(get_step(steps, "name", "Set Build ID (nightly)"))
@@ -239,7 +238,7 @@ def gen_workflow(ruff_version, ruff_vscode_version):
         template["jobs"]["build-ruff"] = gen_ruff_binaries_job(binaries_workflow)
 
     with urlopen(
-        f"https://raw.githubusercontent.com/astral-sh/ruff-vscode/refs/tags/{ruff_vscode_version}/.github/workflows/release.yaml"
+        f"https://raw.githubusercontent.com/astral-sh/ruff-vscode/refs/tags/{ruff_vscode_version}/.github/workflows/release.yml"
     ) as r:
         release_workflow = yaml.load(r)
         template["jobs"]["build"] = gen_ruff_vscode_job(release_workflow)
