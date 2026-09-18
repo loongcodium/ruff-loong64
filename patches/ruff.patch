@@ -1,27 +1,27 @@
-From ed7945bffb329aea40ae9ba523c455ccd9d1d60b Mon Sep 17 00:00:00 2001
+From e9d20ed6ee5813c9b99f11a6cee806269f4ecb03 Mon Sep 17 00:00:00 2001
 From: SkyBird <52884766+SkyBird233@users.noreply.github.com>
 Date: Sat, 13 Sep 2025 01:49:13 +0800
 Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
 
 ---
- .github/workflows/build-binaries.yml       | 14 ++++++++++++--
- .github/workflows/publish-pypi.yml         |  2 ++
- crates/ruff/Cargo.toml                     |  2 +-
- crates/ruff/src/main.rs                    |  3 ++-
- crates/ruff_benchmark/Cargo.toml           |  2 +-
- crates/ruff_benchmark/benches/formatter.rs |  3 ++-
- crates/ruff_benchmark/benches/lexer.rs     |  3 ++-
- crates/ruff_benchmark/benches/linter.rs    |  6 ++++--
- crates/ruff_benchmark/benches/parser.rs    |  3 ++-
- dist-workspace.toml                        |  1 +
- 10 files changed, 29 insertions(+), 10 deletions(-)
+ .github/workflows/build-binaries.yml       | 7 +++++++
+ .github/workflows/publish-pypi.yml         | 2 ++
+ crates/ruff/Cargo.toml                     | 2 +-
+ crates/ruff/src/main.rs                    | 3 ++-
+ crates/ruff_benchmark/Cargo.toml           | 2 +-
+ crates/ruff_benchmark/benches/formatter.rs | 3 ++-
+ crates/ruff_benchmark/benches/lexer.rs     | 3 ++-
+ crates/ruff_benchmark/benches/linter.rs    | 6 ++++--
+ crates/ruff_benchmark/benches/parser.rs    | 3 ++-
+ dist-workspace.toml                        | 1 +
+ 10 files changed, 24 insertions(+), 8 deletions(-)
 
 diff --git a/.github/workflows/build-binaries.yml b/.github/workflows/build-binaries.yml
-index e25be8d8e6..46b4646eb8 100644
+index 201c78f8fa..7e5f4476b6 100644
 --- a/.github/workflows/build-binaries.yml
 +++ b/.github/workflows/build-binaries.yml
-@@ -424,6 +424,13 @@ jobs:
-             arch: riscv64
+@@ -458,6 +458,13 @@ jobs:
+             test_platform: linux/riscv64
              # Minimum manylinux target for riscv64
              manylinux: 2_31
 +          - target: loongarch64-unknown-linux-gnu
@@ -34,29 +34,11 @@ index e25be8d8e6..46b4646eb8 100644
  
      steps:
        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-@@ -449,12 +456,15 @@ jobs:
-         with:
-           arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
-           distro: ${{ matrix.platform.arch == 'arm' && 'bullseye' || 'ubuntu20.04' }}
-+          base_image: ${{ matrix.platform.base_image }}
-           githubToken: ${{ github.token }}
-           install: |
-             apt-get update
--            apt-get install -y --no-install-recommends python3 python3-pip libatomic1
--            pip3 install -U pip
-+            apt-get install -y --no-install-recommends python3 python3-pip python3-venv libatomic1
-           run: |
-+            python3 -m venv .venv
-+            source .venv/bin/activate
-+            pip3 install -U pip
-             pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
-             ruff --help
-       - name: "Upload wheels"
 diff --git a/.github/workflows/publish-pypi.yml b/.github/workflows/publish-pypi.yml
-index 20b8b4e794..d79092d4c2 100644
+index e3906dc6b8..10ac0b71f9 100644
 --- a/.github/workflows/publish-pypi.yml
 +++ b/.github/workflows/publish-pypi.yml
-@@ -30,5 +30,7 @@ jobs:
+@@ -37,5 +37,7 @@ jobs:
            pattern: wheels-*
            path: wheels
            merge-multiple: true
@@ -65,7 +47,7 @@ index 20b8b4e794..d79092d4c2 100644
        - name: Publish to PyPi
          run: uv publish -v wheels/*
 diff --git a/crates/ruff/Cargo.toml b/crates/ruff/Cargo.toml
-index f1d2522982..01acc55be7 100644
+index d2f57e4ee6..32fa866708 100644
 --- a/crates/ruff/Cargo.toml
 +++ b/crates/ruff/Cargo.toml
 @@ -71,7 +71,7 @@ tracing = { workspace = true, features = ["log"] }
@@ -92,10 +74,10 @@ index af8cb8a9d6..04dadac068 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/Cargo.toml b/crates/ruff_benchmark/Cargo.toml
-index cbb817b668..f142962aa2 100644
+index b2f8c692f1..6faa10aba1 100644
 --- a/crates/ruff_benchmark/Cargo.toml
 +++ b/crates/ruff_benchmark/Cargo.toml
-@@ -33,7 +33,7 @@ serde = { workspace = true }
+@@ -35,7 +35,7 @@ serde = { workspace = true }
  serde_json = { workspace = true }
  tracing = { workspace = true }
  
@@ -105,7 +87,7 @@ index cbb817b668..f142962aa2 100644
  
  [target.'cfg(target_os = "windows")'.dependencies]
 diff --git a/crates/ruff_benchmark/benches/formatter.rs b/crates/ruff_benchmark/benches/formatter.rs
-index 06a883e11e..3e45d24eeb 100644
+index ecd094c86a..ad2ad0723b 100644
 --- a/crates/ruff_benchmark/benches/formatter.rs
 +++ b/crates/ruff_benchmark/benches/formatter.rs
 @@ -22,7 +22,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -119,7 +101,7 @@ index 06a883e11e..3e45d24eeb 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/benches/lexer.rs b/crates/ruff_benchmark/benches/lexer.rs
-index 3b1a4dafde..ab7217e376 100644
+index 21380f2c57..363ad138c8 100644
 --- a/crates/ruff_benchmark/benches/lexer.rs
 +++ b/crates/ruff_benchmark/benches/lexer.rs
 @@ -20,7 +20,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -133,7 +115,7 @@ index 3b1a4dafde..ab7217e376 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/benches/linter.rs b/crates/ruff_benchmark/benches/linter.rs
-index 55030dde5f..8b4224752a 100644
+index 8e771d7a06..5f75771a57 100644
 --- a/crates/ruff_benchmark/benches/linter.rs
 +++ b/crates/ruff_benchmark/benches/linter.rs
 @@ -27,7 +27,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -157,7 +139,7 @@ index 55030dde5f..8b4224752a 100644
  ))]
  #[unsafe(export_name = "_rjem_malloc_conf")]
 diff --git a/crates/ruff_benchmark/benches/parser.rs b/crates/ruff_benchmark/benches/parser.rs
-index 8aa633224a..1ba55da740 100644
+index 3a70ea506c..be81acbab3 100644
 --- a/crates/ruff_benchmark/benches/parser.rs
 +++ b/crates/ruff_benchmark/benches/parser.rs
 @@ -19,7 +19,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
