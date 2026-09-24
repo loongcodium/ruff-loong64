@@ -20,7 +20,8 @@ jobs:
         # There's currently no loong64 support for Ubuntu so we are using Debian
           - target: loongarch64-unknown-linux-gnu
             arch: loong64
-            base_image: --platform=linux/loong64 ghcr.io/loong64/debian:trixie
+            test_image: ghcr.io/loong64/debian:trixie
+            test_platform: linux/loong64
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -62,13 +63,12 @@ jobs:
           platform: ${{ matrix.platform.test_platform }}
           artifacts: dist
           run: |
+            apt-get update
+            apt-get install -y --no-install-recommends python3 python3-pip python3-venv libatomic1
             python3 -m venv .venv
-            source .venv/bin/activate
-            pip3 install -U pip
-            pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
+            . .venv/bin/activate
+            pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links /dist --force-reinstall
             ruff --help
-          base_image: ${{ matrix.platform.base_image }}
-          install: "apt-get update\napt-get install -y --no-install-recommends python3 python3-pip python3-venv libatomic1\n"
       - name: Upload wheels
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

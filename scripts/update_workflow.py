@@ -60,7 +60,8 @@ def gen_ruff_binaries_job(original_workflow, patch_path="patches/ruff.patch"):
         # There's currently no loong64 support for Ubuntu so we are using Debian
         - target: loongarch64-unknown-linux-gnu
           arch: loong64
-          base_image: --platform=linux/loong64 ghcr.io/loong64/debian:trixie
+          test_image: ghcr.io/loong64/debian:trixie
+          test_platform: linux/loong64
           maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
     """)
     job["strategy"]["matrix"]["platform"] = platform_loongarch64
@@ -76,16 +77,12 @@ def gen_ruff_binaries_job(original_workflow, patch_path="patches/ruff.patch"):
     test_wheel_step = list(
         filter(lambda step: step.get("name") == "Test wheel", job["steps"])
     )[0]
-    test_wheel_step["with"]["base_image"] = "${{ matrix.platform.base_image }}"
-    test_wheel_step["with"]["install"] = dedent("""\
+    test_wheel_step["with"]["run"] = dedent("""\
         apt-get update
         apt-get install -y --no-install-recommends python3 python3-pip python3-venv libatomic1
-    """)
-    test_wheel_step["with"]["run"] = dedent("""\
         python3 -m venv .venv
-        source .venv/bin/activate
-        pip3 install -U pip
-        pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
+        . .venv/bin/activate
+        pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links /dist --force-reinstall
         ruff --help
     """)
 
