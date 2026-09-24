@@ -70,7 +70,8 @@ def gen_ruff_binaries_job(original_workflow, patch_path="patches/ruff.patch"):
     build_wheel_step = get_step(job["steps"], starts="PyO3/maturin-action")
     build_wheel_step["with"]["args"] = build_wheel_step["with"]["args"].replace(
         # There's currently no official PyPI support for LoongArch
-        " --compatibility pypi", ""
+        " --compatibility pypi",
+        "",
     )
 
     # Patch check step
@@ -166,12 +167,12 @@ def gen_ruff_vscode_job(original_workflow):
         patch_metadata_step,
     )
 
-    # Build step
+    # Package every build; this workflow has no upstream validate-release job.
     build_cmd = 'npx vsce package -o "./dist/ruff-${{ matrix.code-target }}.vsix"'
-    get_step(steps, "name", "Package Extension (release)")["run"] = build_cmd
-    get_step(steps, "name", "Package Extension (nightly)")["run"] = (
-        build_cmd + " --pre-release"
-    )
+    package_step = get_step(steps, "name", "Package Extension (release)")
+    package_step.pop("if")
+    package_step["run"] = build_cmd
+    steps.remove(get_step(steps, "name", "Package Extension (nightly)"))
 
     remove_comments(steps[-1]["with"])
     remove_comments(get_step(steps, "run", "npm ci"))
