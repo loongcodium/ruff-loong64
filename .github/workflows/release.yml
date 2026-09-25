@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RUFF_VERSION: 0.16.8
-  RUFF_VSCODE_VERSION: 2026.82.0
+  RUFF_VERSION: 0.16.9
+  RUFF_VSCODE_VERSION: 2026.84.0
 
 jobs:
   build-ruff:
