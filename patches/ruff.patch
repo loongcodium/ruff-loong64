@@ -1,4 +1,4 @@
-From e9d20ed6ee5813c9b99f11a6cee806269f4ecb03 Mon Sep 17 00:00:00 2001
+From 912f9b1a144fa330e5ffc8ef5031f1f9e357cfd6 Mon Sep 17 00:00:00 2001
 From: SkyBird <52884766+SkyBird233@users.noreply.github.com>
 Date: Sat, 13 Sep 2025 01:49:13 +0800
 Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
@@ -17,10 +17,10 @@ Subject: [PATCH] [ruff]: Build loongarch64 binaries in CI
  10 files changed, 24 insertions(+), 8 deletions(-)
 
 diff --git a/.github/workflows/build-binaries.yml b/.github/workflows/build-binaries.yml
-index 201c78f8fa..7e5f4476b6 100644
+index b48d36ab2d..b7d8583668 100644
 --- a/.github/workflows/build-binaries.yml
 +++ b/.github/workflows/build-binaries.yml
-@@ -458,6 +458,13 @@ jobs:
+@@ -459,6 +459,13 @@ jobs:
              test_platform: linux/riscv64
              # Minimum manylinux target for riscv64
              manylinux: 2_31
@@ -35,11 +35,11 @@ index 201c78f8fa..7e5f4476b6 100644
      steps:
        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 diff --git a/.github/workflows/publish-pypi.yml b/.github/workflows/publish-pypi.yml
-index e3906dc6b8..10ac0b71f9 100644
+index 8b3211dd2a..af51952d85 100644
 --- a/.github/workflows/publish-pypi.yml
 +++ b/.github/workflows/publish-pypi.yml
-@@ -37,5 +37,7 @@ jobs:
-           pattern: wheels-*
+@@ -41,5 +41,7 @@ jobs:
+           artifact-ids: ${{ inputs.artifacts }}
            path: wheels
            merge-multiple: true
 +      - name: Remove wheels unsupported by PyPI
@@ -47,7 +47,7 @@ index e3906dc6b8..10ac0b71f9 100644
        - name: Publish to PyPi
          run: uv publish -v wheels/*
 diff --git a/crates/ruff/Cargo.toml b/crates/ruff/Cargo.toml
-index d2f57e4ee6..32fa866708 100644
+index d9139cc254..5a61a2e9c5 100644
 --- a/crates/ruff/Cargo.toml
 +++ b/crates/ruff/Cargo.toml
 @@ -71,7 +71,7 @@ tracing = { workspace = true, features = ["log"] }
@@ -60,7 +60,7 @@ index d2f57e4ee6..32fa866708 100644
  
  [target.'cfg(target_os = "windows")'.dependencies]
 diff --git a/crates/ruff/src/main.rs b/crates/ruff/src/main.rs
-index af8cb8a9d6..04dadac068 100644
+index ad4adab0c7..2c1e62afa0 100644
 --- a/crates/ruff/src/main.rs
 +++ b/crates/ruff/src/main.rs
 @@ -21,7 +21,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -74,7 +74,7 @@ index af8cb8a9d6..04dadac068 100644
  ))]
  #[global_allocator]
 diff --git a/crates/ruff_benchmark/Cargo.toml b/crates/ruff_benchmark/Cargo.toml
-index b2f8c692f1..6faa10aba1 100644
+index 93a2322745..879dde2ea9 100644
 --- a/crates/ruff_benchmark/Cargo.toml
 +++ b/crates/ruff_benchmark/Cargo.toml
 @@ -35,7 +35,7 @@ serde = { workspace = true }
@@ -153,10 +153,10 @@ index 3a70ea506c..be81acbab3 100644
  ))]
  #[global_allocator]
 diff --git a/dist-workspace.toml b/dist-workspace.toml
-index 103921b8af..6b7d866b56 100644
+index 9129ede518..84535fd3cb 100644
 --- a/dist-workspace.toml
 +++ b/dist-workspace.toml
-@@ -32,6 +32,7 @@ targets = [
+@@ -31,6 +31,7 @@ targets = [
      "powerpc64le-unknown-linux-gnu",
      "riscv64gc-unknown-linux-gnu",
      "s390x-unknown-linux-gnu",
@@ -165,5 +165,5 @@ index 103921b8af..6b7d866b56 100644
      "x86_64-unknown-linux-musl",
      "x86_64-pc-windows-msvc",
 -- 
-2.55.0
+2.56.0
 
