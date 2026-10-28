@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RUFF_VERSION: 0.17.2
-  RUFF_VSCODE_VERSION: 2026.90.0
+  RUFF_VERSION: 0.17.3
+  RUFF_VSCODE_VERSION: 2026.92.0
 
 jobs:
   build-ruff:
@@ -73,6 +73,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wheels-${{ matrix.platform.target }}
+          compression-level: 0
           path: dist
       - name: Archive binary
         shell: bash
@@ -91,6 +92,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: artifacts-${{ matrix.platform.target }}
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
