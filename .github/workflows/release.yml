@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RUFF_VERSION: 0.17.3
-  RUFF_VSCODE_VERSION: 2026.92.0
+  RUFF_VERSION: 0.17.4
+  RUFF_VSCODE_VERSION: 2026.94.0
 
 jobs:
   build-ruff:
@@ -124,6 +124,8 @@ jobs:
       contents: read
 
     steps:
+      - if: runner.os == 'macOS'
+        uses: astral-sh/github-actions/demudhra@7aa50a3def9f5428c532b0ae972d1e5b357de5a5 # 2026.11.03.0
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -164,7 +166,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24.21.0
+          node-version: 26.10.0
           package-manager-cache: false
 
       # Install Node dependencies.
