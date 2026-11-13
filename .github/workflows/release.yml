@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RUFF_VERSION: 0.17.4
-  RUFF_VSCODE_VERSION: 2026.94.0
+  RUFF_VERSION: 0.17.5
+  RUFF_VSCODE_VERSION: 2026.96.0
 
 jobs:
   build-ruff:
@@ -70,7 +70,7 @@ jobs:
             pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links /dist --force-reinstall
             ruff --help
       - name: Upload wheels
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
           compression-level: 0
@@ -89,7 +89,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: Upload binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
           compression-level: 0
@@ -164,9 +164,9 @@ jobs:
           > tmp.json && mv -v tmp.json package.json
 
       - name: Install Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 26.10.0
+          node-version: 26.11.1
           package-manager-cache: false
 
       # Install Node dependencies.
@@ -174,7 +174,7 @@ jobs:
       - name: Package Extension (release)
         run: npx vsce package -o "./dist/ruff-${{ matrix.code-target }}.vsix"
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist-${{ matrix.target }}
           path: ./dist
